@@ -534,6 +534,12 @@ export async function replaceThumbnail(element: HTMLElement, videoID: VideoID, b
         return false;
     }
 
+    // Skip thumbnail replacement entirely for live/upcoming videos
+    if (await isLiveOrUpcoming(videoID)) {
+        resetToShowOriginalThumbnail(image, brandingLocation);
+        return false;
+    }
+
     const box = getThumbnailBox(image, brandingLocation);
 
     if (Config.config!.extensionEnabled) {
