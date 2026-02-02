@@ -44,7 +44,8 @@
 
           installPhase = ''
             runHook preInstall
-            cp -r dist $out
+            mkdir -p $out/share/chromium-extension
+            cp -r dist/* $out/share/chromium-extension/
             runHook postInstall
           '';
 
