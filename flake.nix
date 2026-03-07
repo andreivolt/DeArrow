@@ -51,10 +51,36 @@
 
           dontNpmInstall = true;
         };
+
+        extension = mkDeArrow "chrome";
+
+        manifest = builtins.fromJSON (builtins.readFile "${extension}/share/chromium-extension/manifest.json");
+
+        extId = builtins.readFile (pkgs.runCommand "dearrow-ext-id" {
+          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
+        } ''
+          python3 ${./nix/crx-id.py} ${./keys/signing.pem} > $out
+        '');
+
+        crx = pkgs.runCommand "dearrow-crx" {
+          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
+        } ''
+          mkdir -p $out
+          python3 ${./nix/pack-crx3.py} ${extension}/share/chromium-extension ${./keys/signing.pem} $out/extension.crx
+        '';
+
       in
       {
         packages = {
-          default = mkDeArrow "chrome";
+          inherit extension;
+          default = pkgs.linkFarm "dearrow" [
+            { name = "share/chromium/extensions/${extId}.json";
+              path = pkgs.writeText "${extId}.json" (builtins.toJSON {
+                external_crx = "${crx}/extension.crx";
+                external_version = manifest.version;
+              });
+            }
+          ];
           chrome = mkDeArrow "chrome";
           firefox = mkDeArrow "firefox";
           safari = mkDeArrow "safari";
