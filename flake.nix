@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-crx.url = "github:andreivolt/nix-crx";
     flake-utils.url = "github:numtide/flake-utils";
     maze-utils = {
       url = "github:ajayyy/maze-utils";
@@ -12,7 +13,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, maze-utils, locales }:
+  outputs = { self, nixpkgs, nix-crx, flake-utils, maze-utils, locales }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -54,33 +55,17 @@
 
         extension = mkDeArrow "chrome";
 
-        manifest = builtins.fromJSON (builtins.readFile "${extension}/share/chromium-extension/manifest.json");
-
-        extId = builtins.readFile (pkgs.runCommand "dearrow-ext-id" {
-          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
-        } ''
-          python3 ${./nix/crx-id.py} ${./keys/signing.pem} > $out
-        '');
-
-        crx = pkgs.runCommand "dearrow-crx" {
-          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
-        } ''
-          mkdir -p $out
-          python3 ${./nix/pack-crx3.py} ${extension}/share/chromium-extension ${./keys/signing.pem} $out/extension.crx
-        '';
+        crxPkg = nix-crx.lib.mkCrxPackage {
+          inherit pkgs extension;
+          key = ./keys/signing.pem;
+          name = "dearrow";
+        };
 
       in
       {
         packages = {
           inherit extension;
-          default = pkgs.linkFarm "dearrow" [
-            { name = "share/chromium/extensions/${extId}.json";
-              path = pkgs.writeText "${extId}.json" (builtins.toJSON {
-                external_crx = "${crx}/extension.crx";
-                external_version = manifest.version;
-              });
-            }
-          ];
+          default = crxPkg.package;
           chrome = mkDeArrow "chrome";
           firefox = mkDeArrow "firefox";
           safari = mkDeArrow "safari";
