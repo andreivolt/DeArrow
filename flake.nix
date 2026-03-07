@@ -31,10 +31,14 @@
           env.CHROMEDRIVER_SKIP_DOWNLOAD = "true";
           npmFlags = [ "--ignore-scripts" ];
 
+          postPatch = ''
+            rm -rf maze-utils public/_locales
+            cp -r ${maze-utils} maze-utils
+            cp -r ${locales} public/_locales
+          '';
+
           buildPhase = ''
             runHook preBuild
-            cp -r ${maze-utils}/ maze-utils
-            cp -r ${locales}/ public/_locales
             cp config.json.example config.json
             npm run build:${browser}
             runHook postBuild
