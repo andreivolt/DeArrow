@@ -1,7 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-crx.url = "github:andreivolt/nix-crx";
     flake-utils.url = "github:numtide/flake-utils";
     maze-utils = {
       url = "github:ajayyy/maze-utils";
@@ -13,7 +12,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-crx, flake-utils, maze-utils, locales }:
+  outputs = { self, nixpkgs, flake-utils, maze-utils, locales }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -31,13 +30,10 @@
           env.CHROMEDRIVER_SKIP_DOWNLOAD = "true";
           npmFlags = [ "--ignore-scripts" ];
 
-          postPatch = ''
-            cp -r ${maze-utils}/ maze-utils
-            cp -r ${locales}/ public/_locales
-          '';
-
           buildPhase = ''
             runHook preBuild
+            cp -r ${maze-utils}/ maze-utils
+            cp -r ${locales}/ public/_locales
             cp config.json.example config.json
             npm run build:${browser}
             runHook postBuild
@@ -55,17 +51,33 @@
 
         extension = mkDeArrow "chrome";
 
-        crxPkg = nix-crx.lib.mkCrxPackage {
-          inherit pkgs extension;
-          key = ./keys/signing.pem;
-          name = "dearrow";
-        };
+        manifest = builtins.fromJSON (builtins.readFile "${extension}/share/chromium-extension/manifest.json");
+
+        extId = builtins.readFile (pkgs.runCommand "dearrow-ext-id" {
+          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
+        } ''
+          python3 ${./nix/crx-id.py} ${./keys/signing.pem} > $out
+        '');
+
+        crx = pkgs.runCommand "dearrow-crx" {
+          nativeBuildInputs = [ pkgs.python3 pkgs.openssl ];
+        } ''
+          mkdir -p $out
+          python3 ${./nix/pack-crx3.py} ${extension}/share/chromium-extension ${./keys/signing.pem} $out/extension.crx
+        '';
 
       in
       {
         packages = {
           inherit extension;
-          default = crxPkg.package;
+          default = pkgs.linkFarm "dearrow" [
+            { name = "share/chromium/extensions/${extId}.json";
+              path = pkgs.writeText "${extId}.json" (builtins.toJSON {
+                external_crx = "${crx}/extension.crx";
+                external_version = manifest.version;
+              });
+            }
+          ];
           chrome = mkDeArrow "chrome";
           firefox = mkDeArrow "firefox";
           safari = mkDeArrow "safari";
