@@ -60,6 +60,8 @@
           inherit pkgs extension;
           key = ./keys/signing.pem;
           name = "dearrow";
+          extId = "akhldaacfjcmilfhamkhdbeookhgpimc";
+          version = (builtins.fromJSON (builtins.readFile ./manifest/manifest.json)).version;
         };
 
       in
