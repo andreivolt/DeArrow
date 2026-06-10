@@ -21,32 +21,34 @@
     "locales": {
       "flake": false,
       "locked": {
-        "lastModified": 1779684253,
-        "narHash": "sha256-QF+HMfktrbQoLaqhfZBS3J7I+n8qKCkKecf/bVqxydA=",
+        "lastModified": 1767245771,
+        "narHash": "sha256-unrSfvi+S+I/1WI5fGEW6+Az6SDdgx+qgWCj+Q5CTxw=",
         "owner": "ajayyy",
         "repo": "ExtensionTranslations",
-        "rev": "8d76cfc382ba49fd0a51df0644e6833960113cb0",
+        "rev": "2f498a8579334ad067fd85803f4f00404799a390",
         "type": "github"
       },
       "original": {
         "owner": "ajayyy",
         "repo": "ExtensionTranslations",
+        "rev": "2f498a8579334ad067fd85803f4f00404799a390",
         "type": "github"
       }
     },
     "maze-utils": {
       "flake": false,
       "locked": {
-        "lastModified": 1781039793,
-        "narHash": "sha256-SfCJKMS9ZJPUdYLBmpN9YRFb9VzxoZmagpmgwjPnB+M=",
+        "lastModified": 1767504348,
+        "narHash": "sha256-cjwGLYjjJKnC/4omz0AzsaBsYvZtDOcwqfmTjdDJLaI=",
         "owner": "ajayyy",
         "repo": "maze-utils",
-        "rev": "6b1ba69c38d967ef60bf21e153492a769e3449fe",
+        "rev": "c1e0d65ed4536225fe3502ebdf4059260b17e598",
         "type": "github"
       },
       "original": {
         "owner": "ajayyy",
         "repo": "maze-utils",
+        "rev": "c1e0d65ed4536225fe3502ebdf4059260b17e598",
         "type": "github"
       }
     },

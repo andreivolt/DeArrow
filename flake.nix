@@ -3,12 +3,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-webext.url = "github:rivavolt/nix-webext";
     flake-utils.url = "github:numtide/flake-utils";
+    # Pinned to the exact revs the .gitmodules submodules record: the build replaces the submodule trees with these inputs (postPatch cp), and DeArrow's source moves in lockstep with maze-utils' API (a floating master drifts — e.g. metadataFetcher's getChannelID — and breaks the webpack typecheck on every upstream push).
     maze-utils = {
-      url = "github:ajayyy/maze-utils";
+      url = "github:ajayyy/maze-utils/c1e0d65ed4536225fe3502ebdf4059260b17e598";
       flake = false;
     };
     locales = {
-      url = "github:ajayyy/ExtensionTranslations";
+      url = "github:ajayyy/ExtensionTranslations/2f498a8579334ad067fd85803f4f00404799a390";
       flake = false;
     };
   };
