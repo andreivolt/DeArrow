@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-crx.url = "github:rivavolt/nix-crx";
+    nix-webext.url = "github:rivavolt/nix-webext";
     flake-utils.url = "github:numtide/flake-utils";
     maze-utils = {
       url = "github:ajayyy/maze-utils";
@@ -13,7 +13,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-crx, flake-utils, maze-utils, locales }:
+  outputs = { self, nixpkgs, nix-webext, flake-utils, maze-utils, locales }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -56,20 +56,23 @@
 
         extension = mkDeArrow "chrome";
 
-        crxPkg = nix-crx.lib.mkCrxPackage {
+        # Chrome CRX signed at activation from the sops key (build is keyless);
+        # extId is the stable Chrome ID the old committed key derived. The npm
+        # build emits the Chrome manifest already, so no MV3 projection.
+        ext = nix-webext.lib.mkBrowserExtension {
           inherit pkgs extension;
-          key = ./keys/signing.pem;
-          name = "dearrow";
-          extId = "akhldaacfjcmilfhamkhdbeookhgpimc";
+          pname = "dearrow";
           version = (builtins.fromJSON (builtins.readFile ./manifest/manifest.json)).version;
+          extId = "akhldaacfjcmilfhamkhdbeookhgpimc";
+          firefox = false;
+          transformManifest = false;
         };
-
       in
       {
         packages = {
           inherit extension;
-          default = crxPkg.package;
-          chrome = mkDeArrow "chrome";
+          inherit (ext) default chrome;
+          # Firefox/Safari/Edge native builds (consumed elsewhere as needed).
           firefox = mkDeArrow "firefox";
           safari = mkDeArrow "safari";
           edge = mkDeArrow "edge";
