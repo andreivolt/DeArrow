@@ -71,7 +71,9 @@
       {
         packages = {
           inherit extension;
-          inherit (ext) default chrome;
+          # Expose the nix-webext metadata (extId, chromeContent) so nixos-config's
+          # activation signer can pack + sign the CRX from the sops key.
+          inherit (ext) default chrome extId chromeContent;
           # Firefox/Safari/Edge native builds (consumed elsewhere as needed).
           firefox = mkDeArrow "firefox";
           safari = mkDeArrow "safari";
