@@ -104,12 +104,6 @@ waitFor(() => Config.isReady()).then(() => {
                 }
     
                 Config.config!.showInfoAboutRandomThumbnails = true;
-    
-                if (paywallEnabled) {
-                    setTimeout(() => void chrome.tabs.create({url: chrome.runtime.getURL("/payment.html")}), 100);
-                } else if (!groupPolicyLicenseKey) {
-                    setTimeout(() => void chrome.tabs.create({url: chrome.runtime.getURL("/help.html")}), 100);
-                }
             }
         };
     
